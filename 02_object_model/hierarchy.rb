@@ -83,12 +83,8 @@ class C4
   end
 
   def increment
-    pp "=========="
-    pp value
-    @value += 1
-    pp "=========="
-    pp value
-    @value.to_s
+    self.value += 1
+    self.value.to_s
   end
 
   private
@@ -103,6 +99,11 @@ end
 # - C5.new.another_name が文字列 "M1" を返す
 # - C5.new.other_name が文字列 "Refined M1" を返す
 module M1Refinements
+  refine M1 do
+    def name
+      "Refined M1"
+    end
+  end
 end
 
 class C5
