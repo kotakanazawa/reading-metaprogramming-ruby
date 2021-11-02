@@ -30,6 +30,8 @@ end
 # - C1.ancestors.first(2) が [C1, M1] となる
 # - C1.new.name が 'C1' を返す
 class C1
+  include M1
+
   def name
     'C1'
   end
@@ -41,6 +43,8 @@ end
 # - C2.ancestors.first(2) が [M1, C2] となる
 # - C2.new.name が 'M1' を返す
 class C2
+  prepend M1
+
   def name
     'C2'
   end
@@ -51,12 +55,18 @@ end
 # 次の動作をする C3 class, MySuperClass class を実装する
 # - C3.ancestors.first(6) が [M1, C3, M2, M3, MySuperClass, M4] となる
 # - C3.new.name が 'M1' を返す
-class C3
+class MySuperClass
+  include M4
+  prepend M3
+end
+
+class C3 < MySuperClass
+  include M2
+  prepend M1
   def name
     'C3'
   end
 end
-
 
 # Q4.
 # 次の動作をする C4 class のメソッド increment を実装する
@@ -68,6 +78,19 @@ end
 #   c4.increment # => "3"
 # - 定義済みのメソッド (value, value=) は private のままとなっている
 class C4
+  def initialize
+    @value = 0
+  end
+
+  def increment
+    pp "=========="
+    pp value
+    @value += 1
+    pp "=========="
+    pp value
+    @value.to_s
+  end
+
   private
 
   attr_accessor :value
