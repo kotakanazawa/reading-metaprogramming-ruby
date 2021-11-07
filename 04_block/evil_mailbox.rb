@@ -7,7 +7,39 @@
 # 4. EvilMailboxは、メールを受信するメソッド `receive_mail` を持つ
 # 5. receive_mailメソッドは、メールを受信するためにコンストラクタで受け取ったオブジェクトのreceive_mailメソッドを呼び出す。このオブジェクトのreceive_mailは、送信者と本文の2つの要素をもつ配列で返す。
 # 6. receive_mailメソッドは、受け取ったメールを送信者と本文の2つの要素をもつ配列として返す
-#
+
+class EvilMailbox
+  attr_reader :mail, :authenticated
+
+  def initialize(mail, auth_token = nil)
+    @mail = mail
+    authenticate(auth_token) if auth_token
+  end
+
+  def send_mail(destination, body, &block)
+    body = modified_body_with_secret_string(body, self.auth_token) if authenticated
+    mailed = mail.public_send(:send_mail, destination, body)
+    block.call(mailed) if block_given?
+    return nil
+  end
+
+  def receive_mail
+    mail.public_send(:receive_mail)
+  end
+
+  def authenticate(auth_token)
+    self.auth_token = auth_token
+    @authenticated = mail.public_send(:auth, auth_token)
+  end
+
+  private
+  attr_accessor :auth_token
+
+  def modified_body_with_secret_string(body, auth_token)
+    "#{body}##{auth_token}"
+  end
+end
+
 # 応用機能
 # 1. send_mailメソッドは、ブロックを受けとることができる。ブロックは、送信の成功/失敗の結果をBool値で引数に受け取ることができる
 # 2. コンストラクタは、第2引数として文字列を受け取ることができる（デフォルトはnilである）
