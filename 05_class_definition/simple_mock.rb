@@ -37,3 +37,52 @@
 # obj.imitated_method #=> true
 # obj.called_times(:imitated_method) #=> 2
 # ```
+
+module SimpleMock
+  DEFAULET_CALLED_METHOD_NUMBER = 0
+  COUNT_UP_CALLED_METHOD = 1
+
+  class << self
+    def new(obj = Object.new)
+      obj.extend SimpleMock
+    end
+
+    def mock(obj)
+      new(obj)
+    end
+  end
+
+  def expects(message, value)
+    define_singleton_method message, ->{ value }
+  end
+
+  def watch(method_name)
+    return raise ArgumentError unless methods.include?(method_name)
+
+    set_default_count(method_name)
+
+    original_method = method(method_name)
+    define_singleton_method method_name do
+      coutn_up(method_name)
+      original_method.call
+    end
+  end
+
+  def called_times(method_name)
+    method_mapper[method_name]
+  end
+
+  def method_mapper
+    @method_mapper ||= {}
+  end
+
+  private
+
+  def set_default_count(method_name)
+    method_mapper[method_name] = DEFAULET_CALLED_METHOD_NUMBER
+  end
+
+  def coutn_up(method_name)
+    method_mapper[method_name] += COUNT_UP_CALLED_METHOD
+  end
+end
