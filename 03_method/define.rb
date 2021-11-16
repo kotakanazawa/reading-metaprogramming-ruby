@@ -2,6 +2,10 @@
 # 次の動作をする A1 class を実装する
 # - "//" を返す "//"メソッドが存在すること
 
+class A1
+  define_method("//") { "//" }
+end
+
 # Q2.
 # 次の動作をする A2 class を実装する
 # - 1. "SmartHR Dev Team"と返すdev_teamメソッドが存在すること
@@ -11,6 +15,20 @@
 #   - 引数がnilの場合は、dev_teamメソッドを呼ぶこと
 # - また、2で定義するメソッドは以下を満たすものとする
 #   - メソッドが定義されるのは同時に生成されるオブジェクトのみで、別のA2インスタンスには（同じ値を含む配列を生成時に渡さない限り）定義されない
+
+class A2
+  def initialize(array)
+    array.each do |str|
+      define_singleton_method("hoge_#{str}") do |num|
+        num.nil? ? dev_team : "hoge_#{str}" * num
+      end
+    end
+  end
+
+  def dev_team
+    "SmartHR Dev Team"
+  end
+end
 
 # Q3.
 # 次の動作をする OriginalAccessor モジュール を実装する
