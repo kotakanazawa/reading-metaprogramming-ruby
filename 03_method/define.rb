@@ -42,18 +42,20 @@ end
 # - my_attr_accessorはgetter/setterに加えて、boolean値を代入した際のみ真偽値判定を行うaccessorと同名の?メソッドができること
 
 module OriginalAccessor
-
   def self.included(klass)
     klass.define_singleton_method "my_attr_accessor" do |method_name|
       define_method method_name do
-        @name
+        @value
       end
 
       define_method "#{method_name}=" do |operand|
-        @name = operand
-      end
+        @value = operand
 
-      define_method "#{method_name}?" do |operand|
+        if [TrueClass, FalseClass].any? { |klass| klass == operand.class  }
+          define_singleton_method "#{method_name}?" do
+            @value
+          end
+        end
       end
     end
   end
