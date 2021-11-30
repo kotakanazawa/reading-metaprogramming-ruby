@@ -34,3 +34,20 @@ end
 # 次の動作をする OriginalAccessor モジュール を実装する
 # - OriginalAccessorモジュールはincludeされたときのみ、my_attr_accessorメソッドを定義すること
 # - my_attr_accessorはgetter/setterに加えて、boolean値を代入した際のみ真偽値判定を行うaccessorと同名の?メソッドができること
+module OriginalAccessor
+  def self.included(class_name)
+    class_name.define_singleton_method(:my_attr_accessor) do |hoge|
+      define_method("#{hoge}=") do |value|
+        if value.is_a?(FalseClass) || value.is_a?(TrueClass)
+          define_singleton_method("#{hoge}?") { value }
+        end
+        @value = value
+      end
+
+      define_method("#{hoge}") { @value }
+    end
+  end
+end
+class A3
+  include OriginalAccessor
+end
