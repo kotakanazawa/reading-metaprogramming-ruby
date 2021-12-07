@@ -60,6 +60,11 @@ module TryOver3::OriginalAccessor2
             @attr == true
           end
         end
+
+        if respond_to?("#{attr_sym}?") && [true, false].none?(value)
+          self.class.undef_method "#{attr_sym}?"
+        end
+
         @attr = value
       end
     end
@@ -72,6 +77,18 @@ end
 # TryOver3::A4.runners = [:Hoge]
 # TryOver3::A4::Hoge.run
 # # => "run Hoge"
+
+class TryOver3::A4
+  def self.runners=(syms)
+    singleton_proc = Proc.new do |klass, sym|
+      klass.define_singleton_method :run do
+        "run #{sym}"
+      end
+    end
+
+    syms.each { |sym| self.const_set(sym, Class.new { |klass| singleton_proc.call(klass, sym)})}
+  end
+end
 
 
 # Q5. チャレンジ問題！ 挑戦する方はテストの skip を外して挑戦してみてください。
