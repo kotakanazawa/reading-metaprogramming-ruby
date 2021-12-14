@@ -121,4 +121,3 @@ class TestTryOver03Q1 < Minitest::Test
     end.new
   end
 end
-
