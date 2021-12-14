@@ -2,6 +2,10 @@
 # 次の動作をする A1 class を実装する
 # - "//" を返す "//"メソッドが存在すること
 
+class A1
+  define_method("//") { "//" }
+end
+
 # Q2.
 # 次の動作をする A2 class を実装する
 # - 1. "SmartHR Dev Team"と返すdev_teamメソッドが存在すること
@@ -12,7 +16,38 @@
 # - また、2で定義するメソッドは以下を満たすものとする
 #   - メソッドが定義されるのは同時に生成されるオブジェクトのみで、別のA2インスタンスには（同じ値を含む配列を生成時に渡さない限り）定義されない
 
+class A2
+  def initialize(array)
+    array.each do |str|
+      define_singleton_method("hoge_#{str}") do |num|
+        num.nil? ? dev_team : "hoge_#{str}" * num
+      end
+    end
+  end
+
+  def dev_team
+    "SmartHR Dev Team"
+  end
+end
+
 # Q3.
 # 次の動作をする OriginalAccessor モジュール を実装する
 # - OriginalAccessorモジュールはincludeされたときのみ、my_attr_accessorメソッドを定義すること
 # - my_attr_accessorはgetter/setterに加えて、boolean値を代入した際のみ真偽値判定を行うaccessorと同名の?メソッドができること
+module OriginalAccessor
+  def self.included(class_name)
+    class_name.define_singleton_method(:my_attr_accessor) do |hoge|
+      define_method("#{hoge}=") do |value|
+        if value.is_a?(FalseClass) || value.is_a?(TrueClass)
+          define_singleton_method("#{hoge}?") { value }
+        end
+        @value = value
+      end
+
+      define_method("#{hoge}") { @value }
+    end
+  end
+end
+class A3
+  include OriginalAccessor
+end

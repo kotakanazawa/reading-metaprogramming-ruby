@@ -5,7 +5,15 @@ TryOver3 = Module.new
 # - `test_` から始まるインスタンスメソッドが実行された場合、このクラスは `run_test` メソッドを実行する
 # - `test_` メソッドがこのクラスに実装されていなくても `test_` から始まるメッセージに応答することができる
 # - TryOver3::A1 には `test_` から始まるインスタンスメソッドが定義されていない
+class TryOver3::A1
+  def run_test
+    nil
+  end
 
+  def method_missing(method_name, *args)
+    method_name.to_s.start_with?("test_") ? run_test : super
+  end
+end
 
 # Q2
 # 以下要件を満たす TryOver3::A2Proxy クラスを作成してください。
@@ -15,6 +23,20 @@ class TryOver3::A2
   def initialize(name, value)
     instance_variable_set("@#{name}", value)
     self.class.attr_accessor name.to_sym unless respond_to? name.to_sym
+  end
+end
+
+class TryOver3::A2Proxy
+  def initialize(source)
+    @source = source
+  end
+
+  def method_missing(method_name, *args)
+    @source.send(method_name, *args)
+  end
+
+  def respond_to_missing?(method_name, include_private = false)
+    @source.respond_to?(method_name) || super
   end
 end
 
@@ -36,6 +58,10 @@ module TryOver3::OriginalAccessor2
             @attr == true
           end
         end
+
+        if respond_to?("#{attr_sym}?") && [true, false].none?(value)
+          self.class.undef_method "#{attr_sym}?"
+        end
         @attr = value
       end
     end
@@ -49,6 +75,17 @@ end
 # TryOver3::A4::Hoge.run
 # # => "run Hoge"
 
+class TryOver3::A4
+  def self.runners=(class_names)
+    class_names.each { |class_name| const_set(class_name, define_class(class_name)) }
+  end
+
+  def self.define_class(class_name)
+    Class.new { define_singleton_method(:run) { "run #{class_name}" } }
+  end
+
+  private_class_method :define_class
+end
 
 # Q5. チャレンジ問題！ 挑戦する方はテストの skip を外して挑戦してみてください。
 #
