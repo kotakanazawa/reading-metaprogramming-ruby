@@ -75,6 +75,17 @@ end
 # TryOver3::A4::Hoge.run
 # # => "run Hoge"
 
+class TryOver3::A4
+  def self.runners=(class_names)
+    class_names.each { |class_name| const_set(class_name, define_class(class_name)) }
+  end
+
+  def self.define_class(class_name)
+    Class.new { define_singleton_method(:run) { "run #{class_name}" } }
+  end
+
+  private_class_method :define_class
+end
 
 # Q5. チャレンジ問題！ 挑戦する方はテストの skip を外して挑戦してみてください。
 #
