@@ -96,17 +96,43 @@ end
 # TryOver3::TaskHelper という include すると task というクラスマクロが与えられる以下のようなモジュールがあります。
 module TryOver3::TaskHelper
   def self.included(klass)
+    # klass.define_singleton_method :task do |name, &task_block|
+    #   new_klass = Class.new do
+    #     define_singleton_method :run do
+    #       puts "start #{Time.now}"
+    #       block_return = task_block.call
+    #       puts "finish #{Time.now}"
+    #       block_return
+    #     end
+    #   end
+    #   new_klass_name = name.to_s.split("_").map{ |w| w[0] = w[0].upcase; w }.join
+    #   const_set(new_klass_name, new_klass)
+    # end
+
     klass.define_singleton_method :task do |name, &task_block|
-      new_klass = Class.new do
-        define_singleton_method :run do
-          puts "start #{Time.now}"
-          block_return = task_block.call
-          puts "finish #{Time.now}"
-          block_return
-        end
+      @klass_name = name.to_s.split("_").map{ |w| w[0] = w[0].upcase; w }.join
+
+      define_singleton_method "#{name}" do
+        puts "start #{Time.now}"
+        block_return = task_block.call
+        puts "finish #{Time.now}"
+        block_return
       end
-      new_klass_name = name.to_s.split("_").map{ |w| w[0] = w[0].upcase; w }.join
-      const_set(new_klass_name, new_klass)
+
+      define_singleton_method :const_missing do |const_name|
+        superclass.const_missing(const_name) unless @klass_name.to_s == const_name.to_s
+
+        new_klass = Class.new do
+          define_singleton_method :run do
+            puts "Warning: #{self.name}::#{const_name}.run is deprecated"
+            puts "start #{Time.now}"
+            block_return = task_block.call
+            puts "finish #{Time.now}"
+            block_return
+          end
+        end
+        const_set(const_name, new_klass)
+      end
     end
   end
 end

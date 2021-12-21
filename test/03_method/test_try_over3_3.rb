@@ -76,27 +76,29 @@ class TestTryOver03Q1 < Minitest::Test
   end
 
   def test_q4_not_exists_runner_class
+    skip
     TryOver3::A4.runners = [:Hoge]
     refute_includes(TryOver3::A4.constants, :Hoge)
   end
 
   def test_q5_task_helper_call_method
-    skip
+    # skip
     assert_equal("foo", TryOver3::A5Task.foo)
   end
 
   def test_q5_task_helper_not_exists_class
-    skip
+    # skip
+    binding.irb
     refute_includes TryOver3::A5Task.constants, :Foo
   end
 
   def test_q5_task_helper_call_class
-    skip
+    # skip
     assert_equal("foo", TryOver3::A5Task::Foo.run)
   end
 
   def test_q5_task_helper_call_class_with_warn
-    skip
+    # skip
     _, err = capture_io do
       TryOver3::A5Task::Foo.run
     end
