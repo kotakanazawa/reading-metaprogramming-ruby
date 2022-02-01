@@ -2,7 +2,7 @@
 #
 # # これは、作成するSimpleBotクラスの利用イメージです
 # class Bot < SimpleBot
-#   setting :name, 'bot'
+#   setting :name, 'bot' => settings.name ができる
 #   respond 'keyword' do
 #     "response #{settings.name}"
 #   end
@@ -17,8 +17,28 @@
 #     1. askは、一つの引数をとります
 #     2. askに渡されたオブジェクトが、後述するrespondメソッドで設定したオブジェクトと一致する場合、インスタンスは任意の返り値を持ちます
 #     3. 2のケースに当てはまらない場合、askメソッドの戻り値はnilです
+
 # 3. クラスメソッドrespondは、keywordとブロックを引数に取ります
 #     1. respondメソッドの第1引数keywordと同じ文字列が、インスタンスメソッドaskに渡された時、第2引数に渡したブロックが実行され、その結果が返されます
+
 # 4. クラスメソッドsettingは、引数を2つ取り、1つ目がキー名、2つ目が設定する値です
 #     1. settingメソッドに渡された値は、クラスメソッド `settings` から返されるオブジェクトに、メソッド名としてアクセスすることで取り出すことができます
 #     2. e.g. クラス内で `setting :name, 'bot'` と実行した場合は、respondメソッドに渡されるブロックのスコープ内で `settings.name` の戻り値は `bot` の文字列になります
+
+class SimpleBot
+  def ask(string)
+    public_send(string) if respond_to?(string)
+  end
+
+  def self.respond(string, &block)
+    define_method(string, ->{ block.call })
+  end
+
+  def self.setting(method_name, value)
+    settings.define_singleton_method(method_name, ->{ value })
+  end
+
+  def self.settings
+    @klass ||= Class.new
+  end
+end
