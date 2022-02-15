@@ -50,4 +50,23 @@ module SimpleMock
   def expects(method_name, expected_value)
     define_singleton_method "#{method_name}", ->{ expected_value }
   end
+
+  def called_times(method_name)
+    instance_variable_get("@#{method_name}")
+  end
+
+  def watch(method_name)
+    return unless respond_to?(method_name)
+
+    instance_variable_set("@#{method_name}", 0)
+
+    result = public_send(method_name)
+
+    define_singleton_method "#{method_name}" do
+      incremented_values = instance_variable_get("@#{method_name}") + 1
+      instance_variable_set("@#{method_name}", incremented_values)
+
+      result
+    end
+  end
 end
